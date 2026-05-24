@@ -29,3 +29,7 @@ npm run bot
 ```
 
 Catatan: token bot di `tele.js` sebaiknya diganti/diamankan.
+
+## Proteksi ringan
+
+UI menambahkan pemblokiran klik kanan, beberapa shortcut inspect/devtools, dan seleksi teks. Ini hanya deterrent di sisi browser, bukan proteksi absolut.

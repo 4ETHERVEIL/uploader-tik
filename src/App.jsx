@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const SHARK_MATRIX_B_VALUE = 1
 
@@ -107,108 +107,61 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [dragActive, setDragActive] = useState(false)
 
-  function handleFile(file) {
-    if (!file) {
-      setSelectedFile(null)
-      setStatus({ text: '⏻ Belum ada file dipilih', state: 'idle' })
-      return
-    }
+  useEffect(() => {
+    const blockContext = (event) => event.preventDefault()
 
-    if (!isMp4(file)) {
-      setSelectedFile(null)
-      setStatus({ text: '⚠️ Harap pilih file MP4 yang valid.', state: 'error' })
-      if (inputRef.current) inputRef.current.value = ''
-      return
-    }
+    const blockKeys = (event) => {
+      const key = event.key.toLowerCase()
+      const blocked =
+        key === 'f12' ||
+        (event.ctrlKey && event.shiftKey && ['i', 'j', 'c'].includes(key)) ||
+        (event.ctrlKey && ['u', 's'].includes(key))
 
-    setSelectedFile(file)
-    setStatus({ text: `✓ Siap: ${shortName(file.name)}`, state: 'idle' })
-  }
-
-  function onInputChange(event) {
-    handleFile(event.target.files?.[0])
-  }
-
-  function onDragOver(event) {
-    event.preventDefault()
-    setDragActive(true)
-  }
-
-  function onDragLeave(event) {
-    event.preventDefault()
-    setDragActive(false)
-  }
-
-  function onDrop(event) {
-    event.preventDefault()
-    setDragActive(false)
-    handleFile(event.dataTransfer.files?.[0])
-  }
-
-  async function patchAndDownload() {
-    if (!selectedFile) {
-      setStatus({ text: '❌ Pilih file terlebih dahulu.', state: 'error' })
-      return
-    }
-
-    setIsProcessing(true)
-    setStatus({ text: '🔧 Memproses: mencari mvhd & menerapkan patch matrix...', state: 'processing' })
-
-    try {
-      const arrayBuffer = await selectedFile.arrayBuffer()
-      const patchResult = patchSharkMethod(arrayBuffer)
-
-      setStatus({
-        text: `✓ matrix_b berubah: ${patchResult.previousValue} → ${patchResult.newValue}. Membuat file download...`,
-        state: 'processing'
-      })
-
-      const patchedBlob = new Blob([arrayBuffer], { type: selectedFile.type || 'video/mp4' })
-      const downloadUrl = URL.createObjectURL(patchedBlob)
-      const a = document.createElement('a')
-
-      a.href = downloadUrl
-      a.download = "clean zychodev.mp4"
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(downloadUrl)
-
-      setStatus({
-        text: `✅ Sukses! File "${selectedFile.name}" sudah dipatch & diunduh.`,
-        state: 'success'
-      })
-    } catch (error) {
-      let errorMsg = error.message || 'Terjadi kesalahan saat memproses MP4.'
-
-      if (errorMsg.includes('moov')) {
-        errorMsg = 'Tidak ditemukan struktur moov. Hanya file MP4 standar yang didukung.'
-      } else if (errorMsg.includes('mvhd')) {
-        errorMsg = 'Tidak dapat menemukan mvhd. Pastikan file MP4 valid.'
+      if (blocked) {
+        event.preventDefault()
+        event.stopPropagation()
+        setStatus({
+          text: '⚠️ Akses inspect/debug dibatasi untuk menjaga kode tools.',
+          state: 'error'
+        })
       }
-
-      setStatus({ text: `❌ Gagal: ${errorMsg}`, state: 'error' })
-    } finally {
-      setIsProcessing(false)
     }
-  }
 
+    const blockSelect = (event) => {
+      if (event.target?.tagName !== 'INPUT') event.preventDefault()
+    }
 
+    document.addEventListener('contextmenu', blockContext)
+    document.addEventListener('keydown', blockKeys)
+    document.addEventListener('selectstart', blockSelect)
 
+  
   return (
     <main className="page">
-      <section className="container">
-        <header className="header">
-          <div>
-            <p className="label">ZychoDev Tools</p>
+      <section className="layout">
+        <header className="masthead">
+          <div className="brand-block">
+            <span className="brand-dot">Z</span>
+            <span>ZychoDev</span>
+          </div>
+
+          <div className="headline">
+            <span className="overline">private browser tool</span>
             <h1>Clean Uploader</h1>
-            <p className="subtitle">
-              Bersihkan metadata video MP4 langsung dari browser kamu.
+            <p>
+              Pilih video MP4, proses langsung di perangkat, lalu hasilnya
+              otomatis tersimpan sebagai <b>clean zychodev.mp4</b>.
             </p>
+          </div>
+
+          <div className="chips" aria-label="tool info">
+            <span>Client-side</span>
+            <span>MP4 only</span>
+            <span>No server upload</span>
           </div>
         </header>
 
-        <section className="panel">
+        <section className="tool-card">
           <div
             className={`drop-zone ${dragActive ? 'active' : ''} ${selectedFile ? 'has-file' : ''}`}
             onDragOver={onDragOver}
@@ -224,13 +177,16 @@ export default function App() {
               onChange={onInputChange}
             />
 
-            <div className="file-mark">{selectedFile ? 'MP4' : '+'}</div>
-            <h2>{selectedFile ? shortName(selectedFile.name) : 'Pilih video MP4'}</h2>
-            <p>
-              {selectedFile
-                ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB • ketuk untuk mengganti file`
-                : 'Ketuk area ini untuk memilih file dari perangkat kamu'}
-            </p>
+            <div className="file-badge">{selectedFile ? 'MP4' : 'ADD'}</div>
+
+            <div className="file-copy">
+              <h2>{selectedFile ? shortName(selectedFile.name) : 'Tap untuk pilih video'}</h2>
+              <p>
+                {selectedFile
+                  ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB • tap lagi untuk ganti file`
+                  : 'Drag & drop atau pilih file MP4 dari perangkat kamu'}
+              </p>
+            </div>
           </div>
 
           <button
@@ -238,7 +194,7 @@ export default function App() {
             disabled={!selectedFile || isProcessing}
             onClick={patchAndDownload}
           >
-            {isProcessing ? 'Memproses video...' : 'Clean & Download'}
+            {isProcessing ? 'Memproses...' : 'Clean & Download'}
           </button>
 
           <div className={`status ${status.state}`}>
@@ -246,30 +202,24 @@ export default function App() {
           </div>
         </section>
 
-        <section className="steps">
-          <div className="step">
-            <span>1</span>
-            <div>
-              <h3>Pilih file</h3>
-              <p>Gunakan video dengan format MP4.</p>
-            </div>
-          </div>
+        <section className="notes">
+          <article>
+            <span>01</span>
+            <h3>Pilih file</h3>
+            <p>Gunakan video format MP4 agar proses berjalan normal.</p>
+          </article>
 
-          <div className="step">
-            <span>2</span>
-            <div>
-              <h3>Proses otomatis</h3>
-              <p>File diproses langsung di browser.</p>
-            </div>
-          </div>
+          <article>
+            <span>02</span>
+            <h3>Proses lokal</h3>
+            <p>Patch berjalan di browser, bukan upload ke database/server.</p>
+          </article>
 
-          <div className="step">
-            <span>3</span>
-            <div>
-              <h3>Download hasil</h3>
-              <p>Hasil tersimpan sebagai clean zychodev.mp4.</p>
-            </div>
-          </div>
+          <article>
+            <span>03</span>
+            <h3>Download</h3>
+            <p>Output otomatis bernama clean zychodev.mp4.</p>
+          </article>
         </section>
 
         <footer>
