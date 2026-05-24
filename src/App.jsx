@@ -135,7 +135,99 @@ export default function App() {
     document.addEventListener('keydown', blockKeys)
     document.addEventListener('selectstart', blockSelect)
 
-  
+    return () => {
+      document.removeEventListener('contextmenu', blockContext)
+      document.removeEventListener('keydown', blockKeys)
+      document.removeEventListener('selectstart', blockSelect)
+    }
+  }, [])
+
+  function handleFile(file) {
+    if (!file) {
+      setSelectedFile(null)
+      setStatus({ text: '⏻ Belum ada file dipilih', state: 'idle' })
+      return
+    }
+
+    if (!isMp4(file)) {
+      setSelectedFile(null)
+      setStatus({ text: '⚠️ Harap pilih file MP4 yang valid.', state: 'error' })
+      if (inputRef.current) inputRef.current.value = ''
+      return
+    }
+
+    setSelectedFile(file)
+    setStatus({ text: `✓ Siap: ${shortName(file.name)}`, state: 'idle' })
+  }
+
+  function onInputChange(event) {
+    handleFile(event.target.files?.[0])
+  }
+
+  function onDragOver(event) {
+    event.preventDefault()
+    setDragActive(true)
+  }
+
+  function onDragLeave(event) {
+    event.preventDefault()
+    setDragActive(false)
+  }
+
+  function onDrop(event) {
+    event.preventDefault()
+    setDragActive(false)
+    handleFile(event.dataTransfer.files?.[0])
+  }
+
+  async function patchAndDownload() {
+    if (!selectedFile) {
+      setStatus({ text: '❌ Pilih file terlebih dahulu.', state: 'error' })
+      return
+    }
+
+    setIsProcessing(true)
+    setStatus({ text: '🔧 Memproses video...', state: 'processing' })
+
+    try {
+      const arrayBuffer = await selectedFile.arrayBuffer()
+      const patchResult = patchSharkMethod(arrayBuffer)
+
+      setStatus({
+        text: `✓ matrix_b berubah: ${patchResult.previousValue} → ${patchResult.newValue}. Membuat file download...`,
+        state: 'processing'
+      })
+
+      const patchedBlob = new Blob([arrayBuffer], { type: selectedFile.type || 'video/mp4' })
+      const downloadUrl = URL.createObjectURL(patchedBlob)
+      const a = document.createElement('a')
+
+      a.href = downloadUrl
+      a.download = 'clean zychodev.mp4'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(downloadUrl)
+
+      setStatus({
+        text: '✅ Sukses! File sudah dipatch & diunduh sebagai clean zychodev.mp4.',
+        state: 'success'
+      })
+    } catch (error) {
+      let errorMsg = error.message || 'Terjadi kesalahan saat memproses MP4.'
+
+      if (errorMsg.includes('moov')) {
+        errorMsg = 'Tidak ditemukan struktur moov. Hanya file MP4 standar yang didukung.'
+      } else if (errorMsg.includes('mvhd')) {
+        errorMsg = 'Tidak dapat menemukan mvhd. Pastikan file MP4 valid.'
+      }
+
+      setStatus({ text: `❌ Gagal: ${errorMsg}`, state: 'error' })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   return (
     <main className="page">
       <section className="layout">
