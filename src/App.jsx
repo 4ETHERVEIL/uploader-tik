@@ -194,91 +194,82 @@ export default function App() {
   }
 
 
+
   return (
     <main className="page">
-      <section className="shell">
-        <nav className="topbar">
-          <div className="logo">
-            <span className="logo-mark">Z</span>
-            <span>ZychoDev</span>
-          </div>
-          <span className="nav-badge">Clean Tool</span>
-        </nav>
-
-        <div className="hero-grid">
-          <section className="hero-card">
-            <span className="eyebrow">MP4 Cleaner Tool</span>
-            <h1>Tiktok Clean Uploader</h1>
-            <p>
-              Patch video MP4 langsung dari browser. Tidak upload ke server,
-              hasil langsung otomatis di-download.
+      <section className="container">
+        <header className="header">
+          <div>
+            <p className="label">ZychoDev Tools</p>
+            <h1>Clean Uploader</h1>
+            <p className="subtitle">
+              Bersihkan metadata video MP4 langsung dari browser kamu.
             </p>
+          </div>
+        </header>
 
-            <div className="feature-row">
-              <span>⚡ Client-side</span>
-              <span>🎬 MP4 Only</span>
-              <span>⬇️ Auto Download</span>
+        <section className="panel">
+          <div
+            className={`drop-zone ${dragActive ? 'active' : ''} ${selectedFile ? 'has-file' : ''}`}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onClick={() => inputRef.current?.click()}
+          >
+            <input
+              ref={inputRef}
+              className="file-input"
+              type="file"
+              accept="video/mp4"
+              onChange={onInputChange}
+            />
+
+            <div className="file-mark">{selectedFile ? 'MP4' : '+'}</div>
+            <h2>{selectedFile ? shortName(selectedFile.name) : 'Pilih video MP4'}</h2>
+            <p>
+              {selectedFile
+                ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB • ketuk untuk mengganti file`
+                : 'Ketuk area ini untuk memilih file dari perangkat kamu'}
+            </p>
+          </div>
+
+          <button
+            className="primary-button"
+            disabled={!selectedFile || isProcessing}
+            onClick={patchAndDownload}
+          >
+            {isProcessing ? 'Memproses video...' : 'Clean & Download'}
+          </button>
+
+          <div className={`status ${status.state}`}>
+            {status.text}
+          </div>
+        </section>
+
+        <section className="steps">
+          <div className="step">
+            <span>1</span>
+            <div>
+              <h3>Pilih file</h3>
+              <p>Gunakan video dengan format MP4.</p>
             </div>
-          </section>
+          </div>
 
-          <section className="upload-panel">
-            <div
-              className={`drop-zone ${dragActive ? 'active' : ''} ${selectedFile ? 'has-file' : ''}`}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-              onClick={() => inputRef.current?.click()}
-            >
-              <input
-                ref={inputRef}
-                className="file-input"
-                type="file"
-                accept="video/mp4"
-                onChange={onInputChange}
-              />
-
-              <div className="file-icon">{selectedFile ? '🎞️' : '📁'}</div>
-              <h2>{selectedFile ? shortName(selectedFile.name) : 'Pilih file MP4'}</h2>
-              <p>
-                {selectedFile
-                  ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB • klik untuk ganti file`
-                  : 'Klik di sini atau drag & drop video kamu'}
-              </p>
+          <div className="step">
+            <span>2</span>
+            <div>
+              <h3>Proses otomatis</h3>
+              <p>File diproses langsung di browser.</p>
             </div>
+          </div>
 
-            <button
-              className="patch-button"
-              disabled={!selectedFile || isProcessing}
-              onClick={patchAndDownload}
-            >
-              <span>{isProcessing ? '⏳' : '⚡'}</span>
-              {isProcessing ? 'Lagi diproses...' : 'Patch & Download'}
-            </button>
-
-            <div className={`status ${status.state}`}>
-              {status.text}
+          <div className="step">
+            <span>3</span>
+            <div>
+              <h3>Download hasil</h3>
+              <p>Hasil tersimpan sebagai clean zychodev.mp4.</p>
             </div>
-          </section>
-        </div>
-
-        <section className="info-grid">
-          <article>
-            <div className="mini-icon">01</div>
-            <strong>Pilih Video</strong>
-            <span>Ambil file `.mp4` dari perangkat kamu.</span>
-          </article>
-
-          <article>
-            <div className="mini-icon">02</div>
-            <strong>Patch Otomatis</strong>
-            <span>Tool mengubah matrix MP4 tanpa server.</span>
-          </article>
-
-          <article>
-            <div className="mini-icon">03</div>
-            <strong>Download Hasil</strong>
-            <span>File baru akan tersimpan sebagai `_clean.mp4`.</span>
-          </article>
+          </div>
         </section>
 
         <footer>
