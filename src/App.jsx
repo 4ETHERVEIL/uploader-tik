@@ -109,39 +109,60 @@ export default function App() {
   const [showGuide, setShowGuide] = useState(true)
 
   useEffect(() => {
-    const blockContext = (event) => event.preventDefault()
+    const showBlocked = () => {
+      setStatus({
+        text: '⚠️ Inspect/debug dibatasi untuk menjaga tools.',
+        state: 'error'
+      })
+    }
+
+    const prevent = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      showBlocked()
+      return false
+    }
 
     const blockKeys = (event) => {
       const key = event.key.toLowerCase()
       const blocked =
         key === 'f12' ||
-        (event.ctrlKey && event.shiftKey && ['i', 'j', 'c'].includes(key)) ||
-        (event.ctrlKey && ['u', 's'].includes(key))
+        (event.ctrlKey && event.shiftKey && ['i', 'j', 'c', 'k'].includes(key)) ||
+        (event.metaKey && event.altKey && ['i', 'j', 'c', 'k'].includes(key)) ||
+        (event.ctrlKey && ['u', 's', 'p'].includes(key)) ||
+        (event.metaKey && ['u', 's', 'p'].includes(key))
 
-      if (blocked) {
-        event.preventDefault()
-        event.stopPropagation()
-        setStatus({
-          text: '⚠️ Akses inspect/debug dibatasi untuk menjaga kode tools.',
-          state: 'error'
-        })
+      if (blocked) prevent(event)
+    }
+
+    const detectDevtools = () => {
+      const threshold = 170
+      const widthOpen = window.outerWidth - window.innerWidth > threshold
+      const heightOpen = window.outerHeight - window.innerHeight > threshold
+
+      if (widthOpen || heightOpen) {
+        showBlocked()
       }
     }
 
-    const blockSelect = (event) => {
-      if (event.target?.tagName !== 'INPUT') event.preventDefault()
-    }
+    document.addEventListener('contextmenu', prevent)
+    document.addEventListener('keydown', blockKeys, true)
+    document.addEventListener('selectstart', prevent)
+    document.addEventListener('dragstart', prevent)
+    document.addEventListener('copy', prevent)
 
-    document.addEventListener('contextmenu', blockContext)
-    document.addEventListener('keydown', blockKeys)
-    document.addEventListener('selectstart', blockSelect)
+    const checker = window.setInterval(detectDevtools, 1200)
 
     return () => {
-      document.removeEventListener('contextmenu', blockContext)
-      document.removeEventListener('keydown', blockKeys)
-      document.removeEventListener('selectstart', blockSelect)
+      document.removeEventListener('contextmenu', prevent)
+      document.removeEventListener('keydown', blockKeys, true)
+      document.removeEventListener('selectstart', prevent)
+      document.removeEventListener('dragstart', prevent)
+      document.removeEventListener('copy', prevent)
+      window.clearInterval(checker)
     }
   }, [])
+
 
   function handleFile(file) {
     if (!file) {
@@ -343,6 +364,10 @@ export default function App() {
             <p>Output otomatis bernama clean zychodev.mp4.</p>
           </article>
         </section>
+
+        <footer>
+          <a href="https://whatsapp.com/channel/0029VbD6VzGEKyZOZo8emB1Q" target="_blank" rel="noreferrer">WhatsApp</a>
+        </footer>
       </section>
     </main>
   )
