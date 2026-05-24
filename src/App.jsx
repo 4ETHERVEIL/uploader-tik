@@ -106,6 +106,7 @@ export default function App() {
   })
   const [isProcessing, setIsProcessing] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [showGuide, setShowGuide] = useState(true)
 
   useEffect(() => {
     const blockContext = (event) => event.preventDefault()
@@ -230,6 +231,35 @@ export default function App() {
 
   return (
     <main className="page">
+
+      {showGuide && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            <div className="popup-top">
+              <span className="popup-badge">Guide</span>
+              <button className="popup-close" onClick={() => setShowGuide(false)}>✕</button>
+            </div>
+
+            <h2>Cara menggunakan web tools ini</h2>
+
+            <div className="guide-list">
+              <div><span>1</span><p>Upload video yang ingin di generate lalu download.</p></div>
+              <div><span>2</span><p>Buka Chrome / Kiwi Browser lalu aktifkan <b>Situs Desktop</b>.</p></div>
+              <div><span>3</span><p>Buka link TikTok.com.</p></div>
+              <div><span>4</span><p>Login akun TikTok kamu.</p></div>
+              <div><span>5</span><p>Upload video lewat browser.</p></div>
+              <div><span>6</span><p>Private kan dulu video nya.</p></div>
+              <div><span>7</span><p>Tunggu sekitar 10 menit atau lebih.</p></div>
+            </div>
+
+            <button className="popup-button" onClick={() => setShowGuide(false)}>
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <section className="layout">
         <header className="masthead">
           <div className="brand-block">
@@ -313,11 +343,6 @@ export default function App() {
             <p>Output otomatis bernama clean zychodev.mp4.</p>
           </article>
         </section>
-
-        <footer>
-          <a href="https://www.tiktok.com/@0x0g0ds" target="_blank" rel="noreferrer">TikTok</a>
-          <a href="https://instagram.com/potaldogg" target="_blank" rel="noreferrer">Instagram</a>
-        </footer>
       </section>
     </main>
   )
