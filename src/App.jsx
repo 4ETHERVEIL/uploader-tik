@@ -166,10 +166,9 @@ export default function App() {
       const patchedBlob = new Blob([arrayBuffer], { type: selectedFile.type || 'video/mp4' })
       const downloadUrl = URL.createObjectURL(patchedBlob)
       const a = document.createElement('a')
-      const originalBase = selectedFile.name.replace(/\.[^/.]+$/, '')
 
       a.href = downloadUrl
-      a.download = `${originalBase}_clean.mp4`
+      a.download = "clean zychodev.mp4"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -203,7 +202,7 @@ export default function App() {
             <span className="logo-mark">Z</span>
             <span>ZychoDev</span>
           </div>
-          <span className="nav-badge">React • Vite</span>
+          <span className="nav-badge">Clean Tool</span>
         </nav>
 
         <div className="hero-grid">
