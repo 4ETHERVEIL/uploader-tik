@@ -194,70 +194,97 @@ export default function App() {
     }
   }
 
+
   return (
     <main className="page">
-      <section className="uploader">
-        <div className="brand">
-          <div className="icon">⬤</div>
-          <span className="pill">ZychoDev • React Vite</span>
-          <h1>Tiktok Clean Uploader</h1>
-          <p>
-            Patch MP4 langsung di browser. File tidak perlu upload ke server,
-            proses dilakukan dari perangkat kamu.
-          </p>
+      <section className="shell">
+        <nav className="topbar">
+          <div className="logo">
+            <span className="logo-mark">Z</span>
+            <span>ZychoDev</span>
+          </div>
+          <span className="nav-badge">React • Vite</span>
+        </nav>
+
+        <div className="hero-grid">
+          <section className="hero-card">
+            <span className="eyebrow">MP4 Cleaner Tool</span>
+            <h1>Tiktok Clean Uploader</h1>
+            <p>
+              Patch video MP4 langsung dari browser. Tidak upload ke server,
+              hasil langsung otomatis di-download.
+            </p>
+
+            <div className="feature-row">
+              <span>⚡ Client-side</span>
+              <span>🎬 MP4 Only</span>
+              <span>⬇️ Auto Download</span>
+            </div>
+          </section>
+
+          <section className="upload-panel">
+            <div
+              className={`drop-zone ${dragActive ? 'active' : ''} ${selectedFile ? 'has-file' : ''}`}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onClick={() => inputRef.current?.click()}
+            >
+              <input
+                ref={inputRef}
+                className="file-input"
+                type="file"
+                accept="video/mp4"
+                onChange={onInputChange}
+              />
+
+              <div className="file-icon">{selectedFile ? '🎞️' : '📁'}</div>
+              <h2>{selectedFile ? shortName(selectedFile.name) : 'Pilih file MP4'}</h2>
+              <p>
+                {selectedFile
+                  ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB • klik untuk ganti file`
+                  : 'Klik di sini atau drag & drop video kamu'}
+              </p>
+            </div>
+
+            <button
+              className="patch-button"
+              disabled={!selectedFile || isProcessing}
+              onClick={patchAndDownload}
+            >
+              <span>{isProcessing ? '⏳' : '⚡'}</span>
+              {isProcessing ? 'Lagi diproses...' : 'Patch & Download'}
+            </button>
+
+            <div className={`status ${status.state}`}>
+              {status.text}
+            </div>
+          </section>
         </div>
 
-        <div
-          className={`drop-zone ${dragActive ? 'active' : ''}`}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onClick={() => inputRef.current?.click()}
-        >
-          <input
-            ref={inputRef}
-            className="file-input"
-            type="file"
-            accept="video/mp4"
-            onChange={onInputChange}
-          />
-
-          <div className="drop-icon">📁</div>
-          <h2>{selectedFile ? shortName(selectedFile.name) : 'Pilih / Drop file MP4'}</h2>
-          <p>{selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'Klik area ini untuk memilih file'}</p>
-        </div>
-
-        <button
-          className="patch-button"
-          disabled={!selectedFile || isProcessing}
-          onClick={patchAndDownload}
-        >
-          {isProcessing ? 'Memproses...' : '⚡ Patch & Download'}
-        </button>
-
-        <div className={`status ${status.state}`}>
-          {status.text}
-        </div>
-
-        <div className="info-grid">
+        <section className="info-grid">
           <article>
-            <strong>Format</strong>
-            <span>MP4</span>
+            <div className="mini-icon">01</div>
+            <strong>Pilih Video</strong>
+            <span>Ambil file `.mp4` dari perangkat kamu.</span>
           </article>
+
           <article>
-            <strong>Patch</strong>
-            <span>mvhd matrix_b → 1</span>
+            <div className="mini-icon">02</div>
+            <strong>Patch Otomatis</strong>
+            <span>Tool mengubah matrix MP4 tanpa server.</span>
           </article>
+
           <article>
-            <strong>Mode</strong>
-            <span>Browser only</span>
+            <div className="mini-icon">03</div>
+            <strong>Download Hasil</strong>
+            <span>File baru akan tersimpan sebagai `_clean.mp4`.</span>
           </article>
-        </div>
+        </section>
 
         <footer>
-          <a href="https://www.tiktok.com/@0x0g0ds" target="_blank" rel="noreferrer">🎵 TikTok</a>
-          <a href="https://github.com/potaldogg" target="_blank" rel="noreferrer">🐙 GitHub</a>
-          <a href="https://instagram.com/potaldogg" target="_blank" rel="noreferrer">📷 Instagram</a>
+          <a href="https://www.tiktok.com/@0x0g0ds" target="_blank" rel="noreferrer">TikTok</a>
+          <a href="https://instagram.com/potaldogg" target="_blank" rel="noreferrer">Instagram</a>
         </footer>
       </section>
     </main>
